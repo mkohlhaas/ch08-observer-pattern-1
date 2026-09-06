@@ -22,6 +22,68 @@ observers. The subject maintains a list of observers and notifies them of
 changes, but doesn't know what they do with that information. Observers
 register themselves with subjects they care about and react when notified.
 
+### UML Diagrams
+
+#### Class Diagram
+
+```
+                      ┌───────────────────────────────┐
+                      │         «trait»               │
+                      │         Observer              │
+                      ├───────────────────────────────┤
+                      │ + update(&self, &str)         │
+                      └───────────────────────────────┘
+                                       ▲
+                                       │ «implements»
+                                       │
+          ┌────────────────────────────┴──────────────┐
+          │                                           │
+┌──────────────────────────┐                          │
+│          Subject         │          observers:      │
+├──────────────────────────┤          Rc<RefCell<T>>  │
+│ - observers:             │                          │
+│   Vec<Rc<RefCell<dyn     │                          │
+│     Observer>>>          │                          │
+├──────────────────────────┤                          │
+│ + new() -> Self          │                          │
+│ + attach(&mut self,      │                          │
+│     observer: ObserverT) │                          │
+│ + notify(&self, &str)    │                          │
+└──────────────────────────┘                          │
+          │                                           │
+          │ 1                                 *       │
+          └───────────────────────────────────────────┘
+                                   │
+                                   │ borrow_mut().update(msg)
+                                   ▼
+                   ┌───────────────────────────────┐
+                   │      NotificationWidget       │
+                   ├───────────────────────────────┤
+                   │ - name: String                │
+                   ├───────────────────────────────┤
+                   │ + update(&self, &str)         │
+                   └───────────────────────────────┘
+```
+
+#### Sequence Diagram — `subject.notify(msg)` broadcasting to two widgets
+
+```
+ main                  Subject            NotificationWidget W1    NotificationWidget W2
+   │      attach(w1)       │                          │                       │
+   │─────────────────────▶│  1. register             │                       │
+   │      attach(w2)       │                          │                       │
+   │─────────────────────▶│  2. register             │                       │
+   │      notify(msg)      │                          │                       │
+   │─────────────────────▶│  3. broadcast            │                       │
+   │                       │  borrow_mut().update(msg)                        │
+   │                       │───────────────────────▶ │  4. W1 reacts         │
+   │                       │                          │ "Widget A received..."│
+   │                       │  borrow_mut().update(msg)                        │
+   │                       │───────────────────────────────────────────────▶ │  5. W2 reacts
+   │                       │                          │                       │ "Widget B received..."
+   │                       │                          │                       │
+```
+
 ### When to use the Observer pattern
 
 The Observer pattern fits scenarios where one object's state changes should
