@@ -14,6 +14,8 @@ trait Observer {
 // 2. Define the Subject (Observable) //
 // ================================== //
 
+// keeps a list of observers
+
 type ObserverT = Rc<RefCell<dyn Observer>>;
 
 struct Subject {
@@ -32,6 +34,10 @@ impl Subject {
         self.observers.push(observer);
     }
 
+    // often there is also a detach method
+    // fn detach(...)
+
+    // NOTE: notify() calls observer's update() method
     fn notify(&self, message: &str) {
         for observer in &self.observers {
             // use interior mutability to safely access the observer
@@ -59,20 +65,34 @@ impl Observer for NotificationWidget {
 // ===== //
 
 fn main() {
+    // ------- //
+    // Subject //
+    // ------- //
+
     let mut subject = Subject::new();
 
-    // Create shared, mutable observers using Rc and RefCell
+    // --------- //
+    // Observers //
+    // --------- //
+
     let widget_one = Rc::new(RefCell::new(NotificationWidget {
         name: "Widget A".to_string(),
     }));
+
     let widget_two = Rc::new(RefCell::new(NotificationWidget {
         name: "Widget B".to_string(),
     }));
 
-    // Attach/register observers
+    // ------------------------- //
+    // Attach/register observers //
+    // ------------------------- //
+
     subject.attach(widget_one.clone());
     subject.attach(widget_two.clone());
 
-    // Broadcast state change
+    // ---------------------- //
+    // Broadcast state change //
+    // ---------------------- //
+
     subject.notify("New data is available!");
 }
