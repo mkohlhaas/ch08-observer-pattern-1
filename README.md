@@ -114,11 +114,11 @@ model.
 
 ### 🛠️ Key Challenges in Rust
 
-* Ownership Cycles: A naive implementation creates a reference loop, which Rust prevents by default to ensure memory safety.
-* Shared Mutability: The Subject needs to iterate through its list of Observers to trigger updates, but those Observers may need to mutate their own internal states during the notification process.
+* **Ownership Cycles**: A naive implementation creates a reference loop, which Rust prevents by default to ensure memory safety.
+* **Shared Mutability**: The Subject needs to iterate through its list of Observers to trigger updates, but those Observers may need to mutate their own internal states during the notification process.
 
 ### ⚡ Rust Alternatives to the Observer Pattern
 Because the object-oriented approach requires verbose wrappers like Rc<RefCell<T>>, Rust developers frequently leverage alternative, more idiomatic paradigms:
 
-* Function Closures: Instead of implementing a heavy trait hierarchy, the Subject simply accepts a vector of generic callback functions (Box<dyn Fn(&State)>).
-* Channels (CSP): For modern asynchronous or multi-threaded systems, developers ditch observers altogether in favor of std::sync::mpsc channels or broadcast channels (like those in the tokio crate) to pass event messages safely across threads.
+* **Function Closures**: Instead of implementing a heavy trait hierarchy, the Subject simply accepts a vector of generic callback functions (Box<dyn Fn(&State)>).
+* **Channels (CSP)**: For modern asynchronous or multi-threaded systems, developers ditch observers altogether in favor of std::sync::mpsc channels or broadcast channels (like those in the tokio crate) to pass event messages safely across threads.
